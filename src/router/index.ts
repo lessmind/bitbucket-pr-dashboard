@@ -9,7 +9,7 @@ import routes from './routes';
  * directly export the Router instantiation
  */
 
-export default route<Store<StateInterface>>(function ({ Vue, store }) {
+export default route<Store<StateInterface>>(function({ Vue, store }) {
   Vue.use(VueRouter);
 
   const Router = new VueRouter({
@@ -33,7 +33,7 @@ export default route<Store<StateInterface>>(function ({ Vue, store }) {
       return;
     }
     next();
-  })
+  });
 
   return Router;
-})
+});

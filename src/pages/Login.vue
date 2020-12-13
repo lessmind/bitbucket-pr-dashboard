@@ -28,8 +28,9 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import { Component } from 'vue-property-decorator';
 import { BitbucketCredential } from 'src/store/bitbucket/state';
+import Vue from 'src/base/Vue';
 
 @Component({})
 export default class PageLogin extends Vue {

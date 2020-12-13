@@ -6,7 +6,7 @@
           <q-avatar>
             <img src="https://cdn.quasar.dev/logo/svg/quasar-logo.svg" />
           </q-avatar>
-          Bitbucket Pull Request Dashboard - {{ $store.state.app.title }}
+          Bitbucket Pull Request Dashboard - {{ title }}
         </q-toolbar-title>
         <q-btn
           v-if="$store.state.bitbucket.isLogin"
@@ -23,13 +23,17 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import { Component } from 'vue-property-decorator';
+import Vue from 'src/base/Vue';
 
 @Component({})
 export default class LayoutMain extends Vue {
   logout() {
     this.$store.commit('bitbucket/logout');
     void this.$router.push({ path: '/' });
+  }
+  get title() {
+    return this.$store.state.app.title;
   }
 }
 </script>
