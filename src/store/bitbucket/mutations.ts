@@ -9,6 +9,7 @@ import {
   BitbucketBuildStatus
 } from 'src/components/models';
 import { login } from 'src/boot/axios';
+import Vue from 'vue';
 
 const mutation: MutationTree<BitbucketStateInterface> = {
   login(state: BitbucketStateInterface, payload: BitbucketCredential) {
@@ -45,7 +46,7 @@ const mutation: MutationTree<BitbucketStateInterface> = {
       };
     }
   ) {
-    state.pullRequests[repository] = pullRequestList;
+    Vue.set(state.pullRequests, repository, pullRequestList);
   },
   buildStatuses(
     state: BitbucketStateInterface,
@@ -59,7 +60,11 @@ const mutation: MutationTree<BitbucketStateInterface> = {
       statusList: BitbucketList<BitbucketBuildStatus>;
     }
   ) {
-    state.pullRequests[repository][pullRequest.id].statuses = statusList;
+    Vue.set(
+      state.pullRequests[repository][pullRequest.id],
+      'statuses',
+      statusList
+    );
   }
 };
 

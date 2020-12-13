@@ -3,7 +3,7 @@
     <q-ajax-bar position="top" color="secondary" size="2px" skip-hijack />
     <div class="row items-center">
       <div class="q-pa-sm">
-        <span class="q-pr-md text-weight-medium">Project:</span>
+        <span class="q-pr-sm text-weight-medium">Project:</span>
         <q-btn-dropdown
           color="primary"
           no-caps
@@ -20,6 +20,27 @@
             >
               <q-item-section>
                 <q-item-label>{{ project.name }}</q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </q-btn-dropdown>
+      </div>
+      <div class="q-pa-sm">
+        <q-btn-dropdown
+          color="primary"
+          no-caps
+          icon="sort"
+          :label="sortAsc ? 'Oldest first' : 'Newest first'"
+        >
+          <q-list>
+            <q-item clickable v-close-popup @click="sortAsc = true">
+              <q-item-section>
+                <q-item-label>Oldest first</q-item-label>
+              </q-item-section>
+            </q-item>
+            <q-item clickable v-close-popup @click="sortAsc = false">
+              <q-item-section>
+                <q-item-label>Newest first</q-item-label>
               </q-item-section>
             </q-item>
           </q-list>
@@ -47,6 +68,7 @@
             <q-btn-dropdown
               size="sm"
               style="width: 100px"
+              :loading="loading"
               :color="titleStateColor(pr.title)"
               :label="titleStateName(pr.title)"
             >
@@ -56,7 +78,7 @@
                   :key="state.name"
                   clickable
                   v-close-popup
-                  @click="switchState(state.name, pr)"
+                  @click="switchState(state.name, pr, repo)"
                 >
                   <q-item-section>
                     <q-item-label>{{ state.name }}</q-item-label>
@@ -77,15 +99,27 @@
               <span class="text-grey-8">by {{ pr.author.display_name }}</span>
             </q-item-label>
             <q-item-label lines="1">
-              <q-badge color="positive" text-color="white" class="q-mr-xs">
+              <q-badge
+                :color="countBuild(pr, 'SUCCESSFUL') ? 'positive' : 'grey'"
+                text-color="white"
+                class="q-mr-xs"
+              >
                 {{ countBuild(pr, 'SUCCESSFUL') }}
                 <q-icon name="check_circle" size="20px" class="q-ml-xs" />
               </q-badge>
-              <q-badge color="primary" text-color="white" class="q-mr-xs">
+              <q-badge
+                :color="countBuild(pr, 'INPROGRESS') ? 'primary' : 'grey'"
+                text-color="white"
+                class="q-mr-xs"
+              >
                 {{ countBuild(pr, 'INPROGRESS') }}
                 <q-icon name="change_circle" size="20px" class="q-ml-xs" />
               </q-badge>
-              <q-badge color="negative" text-color="white" class="q-mr-xs">
+              <q-badge
+                :color="countBuild(pr, 'FAILED') ? 'negative' : 'grey'"
+                text-color="white"
+                class="q-mr-xs"
+              >
                 {{ countBuild(pr, 'FAILED') }}
                 <q-icon name="cancel" size="20px" class="q-ml-xs" />
               </q-badge>
@@ -133,11 +167,15 @@ export default class PageDashboard extends Vue {
       color: 'info'
     }
   };
+  loading!: boolean;
+  sortAsc!: boolean;
 
   data() {
     return {
       workspace: this.$route.params.workspace,
-      selectedRepos: []
+      selectedRepos: [],
+      loading: false,
+      sortAsc: false
     };
   }
 
@@ -148,35 +186,23 @@ export default class PageDashboard extends Vue {
     return pr.statuses.values.filter(s => s.state === state).length;
   }
 
-  buildIconColor(pr: BitbucketPullRequest) {
-    if (
-      !pr.statuses ||
-      pr.statuses.values.length === 0 ||
-      pr.statuses.values.filter(s => s.state === 'INPROGRESS').length
-    ) {
-      return 'primary';
+  async switchState(state: string, pr: BitbucketPullRequest, repo: string) {
+    const newTitle = `[${state}]${this.trimTitle(pr.title)}`;
+    if (newTitle === pr.title) {
+      return;
     }
-    if (pr.statuses.values.filter(s => s.state === 'SUCCESSFUL').length) {
-      return 'positive';
+    this.loading = true;
+    try {
+      await this.$store.dispatch('bitbucket/setPullRequestTitle', {
+        pullRequest: pr,
+        repository: repo,
+        workspace: this.currentWorkspace,
+        title: newTitle
+      });
+    } catch (e) {
+      this.$q.notify('Update pull request state failed');
     }
-    return 'negative';
-  }
-
-  buildSummary(pr: BitbucketPullRequest) {
-    if (!pr.statuses || pr.statuses.values.length === 0) {
-      return '0 builds';
-    }
-    const total = pr.statuses.values.length;
-    const building = pr.statuses.values.filter(s => s.state === 'INPROGRESS')
-      .length;
-    const success = pr.statuses.values.filter(s => s.state === 'SUCCESSFUL')
-      .length;
-    const fail = pr.statuses.values.filter(s => s.state === 'FAILED').length;
-    return `Successful(${success}) Building(${building}) Failed(${fail}) in total of ${total} builds`;
-  }
-
-  switchState(state: string, pr: BitbucketPullRequest) {
-    console.log(state, pr);
+    this.loading = false;
   }
 
   titleState(title: string) {
@@ -216,7 +242,6 @@ export default class PageDashboard extends Vue {
 
   @Watch('selectedRepos')
   async onSelectedReposChanged(val: string[], oldVal: string[]) {
-    console.log('selectedRepos', val, oldVal);
     await this.$store.dispatch('bitbucket/updateShowRepositories', {
       workspace: this.currentWorkspace,
       oldRepositories: oldVal,
@@ -253,6 +278,7 @@ export default class PageDashboard extends Vue {
   }
 
   get pullRequests() {
+    console.log('build pullRequests');
     const result: { [key: string]: BitbucketPullRequest[] } = {};
     for (const repo of this.selectedRepos) {
       const prs = Object.values(
@@ -261,7 +287,9 @@ export default class PageDashboard extends Vue {
       prs.sort((a, b) => {
         const ad = new Date(a.updated_on);
         const bd = new Date(b.updated_on);
-        return bd.getTime() - ad.getTime();
+        return this.sortAsc
+          ? ad.getTime() - bd.getTime()
+          : bd.getTime() - ad.getTime();
       });
       result[repo] = prs;
     }

@@ -94,6 +94,27 @@ const actions: ActionTree<BitbucketStateInterface, StateInterface> = {
       pullRequestList: result
     });
   },
+  async setPullRequestTitle(
+    context,
+    {
+      title,
+      pullRequest,
+      workspace,
+      repository
+    }: {
+      title: string;
+      repository: string;
+      workspace: BitbucketWorkspace;
+      pullRequest: BitbucketPullRequest;
+    }
+  ) {
+    await bitbucket.put(pullRequest.links.self.href, { title });
+    await context.dispatch('loadPullRequests', {
+      workspace,
+      repository: repository
+    });
+    await context.dispatch('updateBuildStatuses', { repository });
+  },
   async updateShowRepositories(
     context,
     {
@@ -106,10 +127,13 @@ const actions: ActionTree<BitbucketStateInterface, StateInterface> = {
       newRepositories: string[];
     }
   ) {
+    newRepositories = newRepositories || [];
+    oldRepositories = oldRepositories || [];
     const addRepositories = newRepositories.filter(
       r => !oldRepositories.includes(r)
     );
     for (const slug of addRepositories) {
+      console.log('load', slug);
       await context.dispatch('loadPullRequests', {
         workspace,
         repository: slug

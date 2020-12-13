@@ -52,6 +52,9 @@ export interface BitbucketPullRequest {
   created_on: string;
   updated_on: string;
   links: {
+    self: {
+      href: string;
+    };
     html: {
       href: string;
     };
