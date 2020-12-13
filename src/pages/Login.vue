@@ -29,7 +29,7 @@
 
 <script lang="ts">
 import { Component } from 'vue-property-decorator';
-import { BitbucketCredential } from 'src/store/bitbucket/state';
+import { BitbucketCredential } from 'src/components/models';
 import Vue from 'src/base/Vue';
 
 @Component({})

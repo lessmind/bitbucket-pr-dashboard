@@ -1,13 +1,13 @@
 import { ActionTree } from 'vuex';
 import { StateInterface } from '../index';
+import { BitbucketStateInterface } from './state';
 import {
-  BitbucketStateInterface,
   BitbucketList,
   BitbucketWorkspace,
   BitbucketRepository,
   BitbucketPullRequest,
   BitbucketBuildStatus
-} from './state';
+} from 'src/components/models';
 import { bitbucket } from 'src/boot/axios';
 
 const actions: ActionTree<BitbucketStateInterface, StateInterface> = {

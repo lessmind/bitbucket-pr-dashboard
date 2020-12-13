@@ -2,12 +2,13 @@
   <q-page class="items-start justify-start q-pa-md">
     <q-ajax-bar position="top" color="secondary" size="2px" skip-hijack />
     <div class="row items-center">
-      <div class="col-2">
+      <div class="q-pa-sm">
+        <span class="q-pr-md text-weight-medium">Project:</span>
         <q-btn-dropdown
           color="primary"
           no-caps
           icon="list"
-          :label="`Project: ${currentWorkspace.name}`"
+          :label="currentWorkspace.name"
         >
           <q-list>
             <q-item
@@ -24,7 +25,7 @@
           </q-list>
         </q-btn-dropdown>
       </div>
-      <div class="col-3">
+      <div class="q-pa-sm">
         <q-select
           clearable
           label="Repositories"
@@ -42,9 +43,10 @@
       <template v-for="pr of pullRequests[repo]">
         <q-separator spaced :key="`sp-${pr.id}`" />
         <q-item :key="`item-${pr.id}`">
-          <q-item-section top thumbnail>
+          <q-item-section top class="col">
             <q-btn-dropdown
               size="sm"
+              style="width: 100px"
               :color="titleStateColor(pr.title)"
               :label="titleStateName(pr.title)"
             >
@@ -64,23 +66,24 @@
             </q-btn-dropdown>
           </q-item-section>
 
-          <q-item-section top>
-            <q-item-label lines="1">
-              <span
-                :href="pr.links.html.href"
-                class="text-weight-medium text-dark"
-              >
-                {{ trimTitle(pr.title) }}
-              </span>
-              <span class="text-grey-8">By {{ pr.author.display_name }}</span>
-            </q-item-label>
+          <q-item-section top class="col-11">
             <q-item-label lines="1">
               <a
-                class="q-mt-xs text-body2 text-weight-bold text-primary text-uppercase cursor-pointer"
+                class="q-mr-sm text-body2 text-weight-bold text-primary cursor-pointer"
                 :href="pr.links.html.href"
                 target="_blank"
-                >Review</a
+                >{{ trimTitle(pr.title) }}</a
               >
+              <span class="text-grey-8">by {{ pr.author.display_name }}</span>
+            </q-item-label>
+            <q-item-label lines="1">
+              <q-icon
+                :name="buildIconName(pr)"
+                :color="buildIconColor(pr)"
+                size="20px"
+              >
+                <q-tooltip>{{ buildSummary(pr) }}</q-tooltip>
+              </q-icon>
               <span class="text-grey-8">
                 Last updated: {{ relativeDateTime(pr.updated_on) }}
                 <q-tooltip>{{ fullDateTime(pr.updated_on) }}</q-tooltip>
@@ -99,7 +102,7 @@ import Vue from 'src/base/Vue';
 import {
   BitbucketPullRequest,
   BitbucketWorkspace
-} from 'src/store/bitbucket/state';
+} from 'src/components/models';
 import { date } from 'quasar';
 
 @Component({})
@@ -131,6 +134,47 @@ export default class PageDashboard extends Vue {
       workspace: this.$route.params.workspace,
       selectedRepos: []
     };
+  }
+
+  buildIconName(pr: BitbucketPullRequest) {
+    if (
+      !pr.statuses ||
+      pr.statuses.values.length === 0 ||
+      pr.statuses.values.filter(s => s.state === 'INPROGRESS').length
+    ) {
+      return 'change_circle';
+    }
+    if (pr.statuses.values.filter(s => s.state === 'SUCCESSFUL').length) {
+      return 'check_circle';
+    }
+    return 'cancel';
+  }
+
+  buildIconColor(pr: BitbucketPullRequest) {
+    if (
+      !pr.statuses ||
+      pr.statuses.values.length === 0 ||
+      pr.statuses.values.filter(s => s.state === 'INPROGRESS').length
+    ) {
+      return 'primary';
+    }
+    if (pr.statuses.values.filter(s => s.state === 'SUCCESSFUL').length) {
+      return 'positive';
+    }
+    return 'negative';
+  }
+
+  buildSummary(pr: BitbucketPullRequest) {
+    if (!pr.statuses || pr.statuses.values.length === 0) {
+      return '0 builds';
+    }
+    const total = pr.statuses.values.length;
+    const building = pr.statuses.values.filter(s => s.state === 'INPROGRESS')
+      .length;
+    const success = pr.statuses.values.filter(s => s.state === 'SUCCESSFUL')
+      .length;
+    const fail = pr.statuses.values.filter(s => s.state === 'FAILED').length;
+    return `Successful(${success}) Building(${building}) Failed(${fail}) in total of ${total} builds`;
   }
 
   switchState(state: string, pr: BitbucketPullRequest) {
@@ -194,7 +238,7 @@ export default class PageDashboard extends Vue {
     const minutes = date.getDateDiff(new Date(), d, 'minutes');
     let relative = 'just now';
     if (days) {
-      relative = `${days} days ago`;
+      relative = `${days} day(s) ago`;
     } else if (days) {
       relative = `${hours} hour(s) ago`;
     } else if (minutes) {
@@ -212,8 +256,10 @@ export default class PageDashboard extends Vue {
 
   get pullRequests() {
     const result: { [key: string]: BitbucketPullRequest[] } = {};
-    for (const repo in this.$store.state.bitbucket.pullRequests) {
-      const prs = Object.values(this.$store.state.bitbucket.pullRequests[repo]);
+    for (const repo of this.selectedRepos) {
+      const prs = Object.values(
+        this.$store.state.bitbucket.pullRequests[repo] || []
+      );
       prs.sort((a, b) => {
         const ad = new Date(a.updated_on);
         const bd = new Date(b.updated_on);

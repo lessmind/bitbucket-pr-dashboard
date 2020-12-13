@@ -1,14 +1,13 @@
 import { MutationTree } from 'vuex';
+import { BitbucketStateInterface, BITBUCKET_CRED } from './state';
 import {
-  BitbucketStateInterface,
   BitbucketCredential,
-  BITBUCKET_CRED,
   BitbucketList,
   BitbucketWorkspace,
   BitbucketRepository,
   BitbucketPullRequest,
   BitbucketBuildStatus
-} from './state';
+} from 'src/components/models';
 import { login } from 'src/boot/axios';
 
 const mutation: MutationTree<BitbucketStateInterface> = {
