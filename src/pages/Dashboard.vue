@@ -43,7 +43,7 @@
       <template v-for="pr of pullRequests[repo]">
         <q-separator spaced :key="`sp-${pr.id}`" />
         <q-item :key="`item-${pr.id}`">
-          <q-item-section top class="col">
+          <q-item-section top class="col justify-center">
             <q-btn-dropdown
               size="sm"
               style="width: 100px"
@@ -77,13 +77,18 @@
               <span class="text-grey-8">by {{ pr.author.display_name }}</span>
             </q-item-label>
             <q-item-label lines="1">
-              <q-icon
-                :name="buildIconName(pr)"
-                :color="buildIconColor(pr)"
-                size="20px"
-              >
-                <q-tooltip>{{ buildSummary(pr) }}</q-tooltip>
-              </q-icon>
+              <q-badge color="positive" text-color="white" class="q-mr-xs">
+                {{ countBuild(pr, 'SUCCESSFUL') }}
+                <q-icon name="check_circle" size="20px" class="q-ml-xs" />
+              </q-badge>
+              <q-badge color="primary" text-color="white" class="q-mr-xs">
+                {{ countBuild(pr, 'INPROGRESS') }}
+                <q-icon name="change_circle" size="20px" class="q-ml-xs" />
+              </q-badge>
+              <q-badge color="negative" text-color="white" class="q-mr-xs">
+                {{ countBuild(pr, 'FAILED') }}
+                <q-icon name="cancel" size="20px" class="q-ml-xs" />
+              </q-badge>
               <span class="text-grey-8">
                 Last updated: {{ relativeDateTime(pr.updated_on) }}
                 <q-tooltip>{{ fullDateTime(pr.updated_on) }}</q-tooltip>
@@ -136,18 +141,11 @@ export default class PageDashboard extends Vue {
     };
   }
 
-  buildIconName(pr: BitbucketPullRequest) {
-    if (
-      !pr.statuses ||
-      pr.statuses.values.length === 0 ||
-      pr.statuses.values.filter(s => s.state === 'INPROGRESS').length
-    ) {
-      return 'change_circle';
+  countBuild(pr: BitbucketPullRequest, state: string) {
+    if (!pr.statuses || pr.statuses.values.length === 0) {
+      return 0;
     }
-    if (pr.statuses.values.filter(s => s.state === 'SUCCESSFUL').length) {
-      return 'check_circle';
-    }
-    return 'cancel';
+    return pr.statuses.values.filter(s => s.state === state).length;
   }
 
   buildIconColor(pr: BitbucketPullRequest) {
