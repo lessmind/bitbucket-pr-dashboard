@@ -27,7 +27,7 @@
       </div>
       <div class="q-pa-sm">
         <q-btn-dropdown
-          color="primary"
+          color="secondary"
           no-caps
           icon="sort"
           :label="sortAsc ? 'Oldest first' : 'Newest first'"
@@ -56,6 +56,20 @@
           style="min-width: 250px;"
         />
       </div>
+      <div class="q-pa-sm">
+        <q-input
+          v-model.number="intervalSecs"
+          label="Reload after seconds"
+          type="number"
+          style="max-width: 200px"
+        />
+      </div>
+      <span class="q-pr-sm text-weight-medium"
+        >Reload in {{ reloadAfter }}</span
+      >
+      <q-btn color="warning" @click="timeToReload = new Date()"
+        >Reload now</q-btn
+      >
     </div>
 
     <q-list v-for="repo of selectedRepos" :key="repo">
@@ -124,7 +138,7 @@
                 <q-icon name="cancel" size="20px" class="q-ml-xs" />
               </q-badge>
               <span class="text-grey-8">
-                Last updated: {{ relativeDateTime(pr.updated_on) }}
+                Last updated: {{ pastRelativeDateTime(pr.updated_on) }}
                 <q-tooltip>{{ fullDateTime(pr.updated_on) }}</q-tooltip>
               </span>
             </q-item-label>
@@ -169,14 +183,46 @@ export default class PageDashboard extends Vue {
   };
   loading!: boolean;
   sortAsc!: boolean;
+  intervalSecs!: number;
+  timeToReload!: Date;
+  now!: Date;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  interval!: any;
 
   data() {
     return {
       workspace: this.$route.params.workspace,
       selectedRepos: [],
       loading: false,
-      sortAsc: false
+      sortAsc: false,
+      intervalSecs: 300,
+      timeToReload: new Date(Date.now() + 300000),
+      now: new Date(),
+      interval: null
     };
+  }
+
+  created() {
+    if (this.interval) {
+      clearInterval(this.interval);
+    }
+    this.interval = setInterval(() => {
+      if (Date.now() >= this.timeToReload.getTime()) {
+        this.timeToReload = new Date(Date.now() + this.intervalSecs * 1000);
+        void this.$store.dispatch('bitbucket/updateShowRepositories', {
+          workspace: this.currentWorkspace,
+          oldRepositories: [],
+          newRepositories: this.selectedRepos
+        });
+      }
+      this.now = new Date();
+    }, 1000);
+  }
+
+  beforeDestroy() {
+    if (this.interval) {
+      clearInterval(this.interval);
+    }
   }
 
   countBuild(pr: BitbucketPullRequest, state: string) {
@@ -245,6 +291,11 @@ export default class PageDashboard extends Vue {
     );
   }
 
+  @Watch('intervalSecs')
+  onIntervalSecsChanged(val: number) {
+    this.timeToReload = new Date(Date.now() + val * 1000);
+  }
+
   @Watch('selectedRepos')
   async onSelectedReposChanged(val: string[], oldVal: string[]) {
     await this.$store.dispatch('bitbucket/updateShowRepositories', {
@@ -259,11 +310,12 @@ export default class PageDashboard extends Vue {
     return date.formatDate(d, 'Do, MMM YYYY (ddd) HH:mm:ss');
   }
 
-  relativeDateTime(str: string) {
+  pastRelativeDateTime(str: string) {
     const d = new Date(str);
     const days = date.getDateDiff(new Date(), d, 'days');
     const hours = date.getDateDiff(new Date(), d, 'hours');
     const minutes = date.getDateDiff(new Date(), d, 'minutes');
+    const seconds = date.getDateDiff(new Date(), d, 'seconds');
     let relative = 'just now';
     if (days) {
       relative = `${days} day(s) ago`;
@@ -271,6 +323,26 @@ export default class PageDashboard extends Vue {
       relative = `${hours} hour(s) ago`;
     } else if (minutes) {
       relative = `${minutes} minute(s) ago`;
+    } else if (seconds) {
+      relative = `${seconds} minute(s) ago`;
+    }
+    return relative;
+  }
+
+  get reloadAfter() {
+    const days = date.getDateDiff(this.timeToReload, this.now, 'days');
+    const hours = date.getDateDiff(this.timeToReload, this.now, 'hours');
+    const minutes = date.getDateDiff(this.timeToReload, this.now, 'minutes');
+    const seconds = date.getDateDiff(this.timeToReload, this.now, 'seconds');
+    let relative = 'now';
+    if (days) {
+      relative = `${days} day(s)`;
+    } else if (days) {
+      relative = `${hours} hour(s)`;
+    } else if (minutes) {
+      relative = `${minutes} minute(s)`;
+    } else if (seconds) {
+      relative = `${seconds} second(s)`;
     }
     return relative;
   }
