@@ -94,26 +94,33 @@ const actions: ActionTree<BitbucketStateInterface, StateInterface> = {
       pullRequestList: result
     });
   },
-  async setPullRequestTitle(
+  async updateRepositoryPullRequests(
     context,
     {
-      title,
-      pullRequest,
       workspace,
       repository
     }: {
-      title: string;
-      repository: string;
       workspace: BitbucketWorkspace;
-      pullRequest: BitbucketPullRequest;
+      repository: string;
     }
   ) {
-    await bitbucket.put(pullRequest.links.self.href, { title });
     await context.dispatch('loadPullRequests', {
       workspace,
       repository: repository
     });
     await context.dispatch('updateBuildStatuses', { repository });
+  },
+  async setPullRequestTitle(
+    context,
+    {
+      title,
+      pullRequest
+    }: {
+      title: string;
+      pullRequest: BitbucketPullRequest;
+    }
+  ) {
+    await bitbucket.put(pullRequest.links.self.href, { title });
   },
   async updateShowRepositories(
     context,

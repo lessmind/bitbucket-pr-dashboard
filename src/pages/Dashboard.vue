@@ -187,7 +187,10 @@ export default class PageDashboard extends Vue {
   }
 
   async switchState(state: string, pr: BitbucketPullRequest, repo: string) {
-    const newTitle = `[${state}]${this.trimTitle(pr.title)}`;
+    const newTitle =
+      state === 'READY'
+        ? this.trimTitle(pr.title)
+        : `[${state}]${this.trimTitle(pr.title)}`;
     if (newTitle === pr.title) {
       return;
     }
@@ -195,9 +198,11 @@ export default class PageDashboard extends Vue {
     try {
       await this.$store.dispatch('bitbucket/setPullRequestTitle', {
         pullRequest: pr,
-        repository: repo,
-        workspace: this.currentWorkspace,
         title: newTitle
+      });
+      await this.$store.dispatch('bitbucket/updateRepositoryPullRequests', {
+        repository: repo,
+        workspace: this.currentWorkspace
       });
     } catch (e) {
       this.$q.notify('Update pull request state failed');
