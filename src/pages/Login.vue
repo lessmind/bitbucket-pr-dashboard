@@ -27,7 +27,10 @@
       <p class="text-weight-bold text-h6">
         Required app password permissions
       </p>
-      <q-img src="/permissions.png" style="width: 400px" />
+      <q-img
+        src="/bitbucket-pr-dashboard/permissions.png"
+        style="width: 400px"
+      />
     </div>
   </q-page>
 </template>
