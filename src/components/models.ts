@@ -32,6 +32,11 @@ export interface BitbucketUser {
   uuid: string;
   nickname: string;
   account_id: string;
+  links: {
+    avatar: {
+      href: string;
+    };
+  };
 }
 
 export interface BitbucketPullRequest {

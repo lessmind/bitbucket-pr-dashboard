@@ -110,7 +110,12 @@
                 target="_blank"
                 >{{ trimTitle(pr.title) }}</a
               >
-              <span class="text-grey-8">by {{ pr.author.display_name }}</span>
+              <q-chip>
+                <q-avatar>
+                  <img :src="pr.author.links.avatar.href" />
+                </q-avatar>
+                {{ pr.author.display_name }}
+              </q-chip>
             </q-item-label>
             <q-item-label lines="1">
               <q-badge
@@ -272,7 +277,7 @@ export default class PageDashboard extends Vue {
   }
 
   trimTitle(title: string) {
-    const match = /^\[(\w+)\](.*)/.exec(title);
+    const match = /^\[(\w+)\]\s*(.*)/.exec(title);
     return match ? (this.states[match[1]] ? match[2] : title) : title;
   }
 
@@ -319,7 +324,7 @@ export default class PageDashboard extends Vue {
     let relative = 'just now';
     if (days) {
       relative = `${days} day(s) ago`;
-    } else if (days) {
+    } else if (hours) {
       relative = `${hours} hour(s) ago`;
     } else if (minutes) {
       relative = `${minutes} minute(s) ago`;
@@ -337,7 +342,7 @@ export default class PageDashboard extends Vue {
     let relative = 'now';
     if (days) {
       relative = `${days} day(s)`;
-    } else if (days) {
+    } else if (hours) {
       relative = `${hours} hour(s)`;
     } else if (minutes) {
       relative = `${minutes} minute(s)`;
