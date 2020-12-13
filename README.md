@@ -9,7 +9,7 @@ It's very hard to tell when a pull request is ready for review or working in pro
 - Using [bitbucket rest api](https://api.bitbucket.org/) with [app password](https://bitbucket.org/account/settings/app-passwords/)
 - [Vue](https://vuejs.org/) and [Quasar framework](https://quasar.dev/)
 
-Note: the app password will be stored in local storage now, **DON'T use it on devices you don't trust**
+Note: the app password will be stored in local storage now, **ALWAYS logout on devices you don't trust**
 
 ### Features
 - listing pull requests with chosen project and repositories
@@ -24,7 +24,7 @@ Note: the app password will be stored in local storage now, **DON'T use it on de
 ### Live demo with github pages
 https://lessmind.github.io/bitbucket-pr-dashboard/#
 
-Again, the app password will be stored in local storage now, **DON'T use it on devices you don't trust**
+Again, the app password will be stored in local storage now, **ALWAYS logout on devices you don't trust**
 
 ### TODOs
 - [ ] make login credential only stored in localStorage when user ask to
