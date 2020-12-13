@@ -1,7 +1,7 @@
 <template>
   <q-page class="row items-center justify-evenly">
-    <div class="q-pa-md">
-      <div class="q-gutter-y-md column" style="max-width: 300px">
+    <div class="q-pa-md items-center justify-center">
+      <div class="q-gutter-y-md column" style="max-width: 400px">
         <q-input
           v-model="credential.username"
           label="Username"
@@ -20,9 +20,14 @@
           target="_blank"
           outline
           color="primary"
-          label="Obtain app password"
+          label="Obtain app password here"
         />
       </div>
+      <q-separator class="q-mt-md" />
+      <p class="text-weight-bold text-h6">
+        Required app password permissions
+      </p>
+      <q-img src="/permissions.png" style="width: 400px" />
     </div>
   </q-page>
 </template>
