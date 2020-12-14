@@ -116,6 +116,21 @@
                 </q-avatar>
                 {{ pr.author.display_name }}
               </q-chip>
+              <q-avatar
+                size="30px"
+                v-for="participant of pr.participants"
+                :key="participant.user.uuid"
+              >
+                <img :src="participant.user.links.avatar.href" />
+                <q-badge
+                  v-if="participant.approved"
+                  floating
+                  color="green"
+                  style="width: 13px; height: 13px; padding: 3px"
+                >
+                  <q-icon name="check" size="5px" />
+                </q-badge>
+              </q-avatar>
             </q-item-label>
             <q-item-label lines="1">
               <q-badge
