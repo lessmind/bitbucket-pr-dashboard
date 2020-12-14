@@ -207,23 +207,6 @@ export default class PageDashboard extends Vue {
     };
   }
 
-  created() {
-    if (this.interval) {
-      clearInterval(this.interval);
-    }
-    this.interval = setInterval(() => {
-      if (Date.now() >= this.timeToReload.getTime()) {
-        this.timeToReload = new Date(Date.now() + this.intervalSecs * 1000);
-        void this.$store.dispatch('bitbucket/updateShowRepositories', {
-          workspace: this.currentWorkspace,
-          oldRepositories: [],
-          newRepositories: this.selectedRepos
-        });
-      }
-      this.now = new Date();
-    }, 1000);
-  }
-
   beforeDestroy() {
     if (this.interval) {
       clearInterval(this.interval);
@@ -329,7 +312,7 @@ export default class PageDashboard extends Vue {
     } else if (minutes) {
       relative = `${minutes} minute(s) ago`;
     } else if (seconds) {
-      relative = `${seconds} minute(s) ago`;
+      relative = `${seconds} seconds(s) ago`;
     }
     return relative;
   }
@@ -360,7 +343,6 @@ export default class PageDashboard extends Vue {
   }
 
   get pullRequests() {
-    console.log('build pullRequests');
     const result: { [key: string]: BitbucketPullRequest[] } = {};
     for (const repo of this.selectedRepos) {
       const prs = Object.values(
@@ -410,6 +392,20 @@ export default class PageDashboard extends Vue {
         path: `/dashboard/${this.currentWorkspace.slug}`
       });
     }
+    if (this.interval) {
+      clearInterval(this.interval);
+    }
+    this.interval = setInterval(() => {
+      if (Date.now() >= this.timeToReload.getTime()) {
+        this.timeToReload = new Date(Date.now() + this.intervalSecs * 1000);
+        void this.$store.dispatch('bitbucket/updateShowRepositories', {
+          workspace: this.currentWorkspace,
+          oldRepositories: [],
+          newRepositories: this.selectedRepos
+        });
+      }
+      this.now = new Date();
+    }, 1000);
   }
 }
 </script>

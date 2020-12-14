@@ -140,7 +140,6 @@ const actions: ActionTree<BitbucketStateInterface, StateInterface> = {
       r => !oldRepositories.includes(r)
     );
     for (const slug of addRepositories) {
-      console.log('load', slug);
       await context.dispatch('loadPullRequests', {
         workspace,
         repository: slug
