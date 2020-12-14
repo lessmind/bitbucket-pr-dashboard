@@ -43,6 +43,10 @@ export interface BitbucketPullRequest {
   id: number;
   author: BitbucketUser;
   title: string;
+  participants: {
+    user: BitbucketUser;
+    approved: boolean;
+  }[];
   destination: {
     branch: {
       name: string;
@@ -54,6 +58,7 @@ export interface BitbucketPullRequest {
     };
   };
   comment_count: number;
+  task_count: number;
   created_on: string;
   updated_on: string;
   links: {

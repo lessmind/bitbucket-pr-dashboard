@@ -81,7 +81,7 @@ const actions: ActionTree<BitbucketStateInterface, StateInterface> = {
     const {
       data
     }: { data: BitbucketList<BitbucketPullRequest> } = await bitbucket.get(
-      `repositories/${workspace.slug}/${repository}/pullrequests?state=OPEN&pagelen=50`
+      `repositories/${workspace.slug}/${repository}/pullrequests?state=OPEN&fields=%2Bvalues.participants&pagelen=50`
     );
     const result: {
       [key: string]: BitbucketPullRequest;

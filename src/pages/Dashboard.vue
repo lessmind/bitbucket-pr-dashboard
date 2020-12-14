@@ -142,6 +142,22 @@
                 {{ countBuild(pr, 'FAILED') }}
                 <q-icon name="cancel" size="20px" class="q-ml-xs" />
               </q-badge>
+              <q-badge
+                :color="pr.comment_count ? 'cyan' : 'grey'"
+                text-color="white"
+                class="q-mr-xs"
+              >
+                {{ pr.comment_count }} comments
+                <q-icon name="message" size="20px" class="q-ml-xs" />
+              </q-badge>
+              <q-badge
+                :color="pr.task_count ? 'teal' : 'grey'"
+                text-color="white"
+                class="q-mr-xs"
+              >
+                {{ pr.task_count }} tasks
+                <q-icon name="check_box" size="20px" class="q-ml-xs" />
+              </q-badge>
               <span class="text-grey-8">
                 Last updated: {{ pastRelativeDateTime(pr.updated_on) }}
                 <q-tooltip>{{ fullDateTime(pr.updated_on) }}</q-tooltip>
