@@ -98,6 +98,16 @@
                     <q-item-label>{{ state.name }}</q-item-label>
                   </q-item-section>
                 </q-item>
+                <q-item clickable v-close-popup @click="approve(pr, repo)">
+                  <q-item-section>
+                    <q-item-label>Approve</q-item-label>
+                  </q-item-section>
+                </q-item>
+                <q-item clickable v-close-popup @click="unapprove(pr, repo)">
+                  <q-item-section>
+                    <q-item-label>Unapprove</q-item-label>
+                  </q-item-section>
+                </q-item>
               </q-list>
             </q-btn-dropdown>
           </q-item-section>
@@ -249,6 +259,49 @@ export default class PageDashboard extends Vue {
       return 0;
     }
     return pr.statuses.values.filter(s => s.state === state).length;
+  }
+
+  async approve(pr: BitbucketPullRequest, repo: string) {
+    this.loading = true;
+    try {
+      await this.$store.dispatch('bitbucket/approve', {
+        pullRequest: pr,
+        repository: repo,
+        workspace: this.currentWorkspace
+      });
+      let newTitle = this.trimTitle(pr.title);
+      if (newTitle != pr.title) {
+        await this.$store.dispatch('bitbucket/setPullRequestTitle', {
+          pullRequest: pr,
+          title: newTitle
+        });
+      }
+      await this.$store.dispatch('bitbucket/updateRepositoryPullRequests', {
+        repository: repo,
+        workspace: this.currentWorkspace
+      });
+    } catch (e) {
+      this.$q.notify('Approve pull request failed');
+    }
+    this.loading = false;
+  }
+
+  async unapprove(pr: BitbucketPullRequest, repo: string) {
+    this.loading = true;
+    try {
+      await this.$store.dispatch('bitbucket/unapprove', {
+        pullRequest: pr,
+        repository: repo,
+        workspace: this.currentWorkspace
+      });
+      await this.$store.dispatch('bitbucket/updateRepositoryPullRequests', {
+        repository: repo,
+        workspace: this.currentWorkspace
+      });
+    } catch (e) {
+      this.$q.notify('Unapprove pull request failed');
+    }
+    this.loading = false;
   }
 
   async switchState(state: string, pr: BitbucketPullRequest, repo: string) {

@@ -27,6 +27,38 @@ const actions: ActionTree<BitbucketStateInterface, StateInterface> = {
     );
     context.commit('repositories', data);
   },
+  async approve(
+    context,
+    {
+      workspace,
+      repository,
+      pullRequest
+    }: {
+      workspace: BitbucketWorkspace;
+      repository: string;
+      pullRequest: BitbucketPullRequest;
+    }
+  ) {
+    return await bitbucket.post(
+      `repositories/${workspace.slug}/${repository}/pullrequests/${pullRequest.id}/approve`
+    );
+  },
+  async unapprove(
+    context,
+    {
+      workspace,
+      repository,
+      pullRequest
+    }: {
+      workspace: BitbucketWorkspace;
+      repository: string;
+      pullRequest: BitbucketPullRequest;
+    }
+  ) {
+    return await bitbucket.delete(
+      `repositories/${workspace.slug}/${repository}/pullrequests/${pullRequest.id}/approve`
+    );
+  },
   async updateBuildStatus(
     context,
     {
