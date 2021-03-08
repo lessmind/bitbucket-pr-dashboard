@@ -140,6 +140,14 @@
                 >
                   <q-icon name="check" size="5px" />
                 </q-badge>
+                <q-badge
+                  v-if="participant.state === 'changes_requested'"
+                  floating
+                  color="warning"
+                  style="width: 13px; height: 13px; padding: 3px"
+                >
+                  <q-icon name="pause" size="5px" />
+                </q-badge>
               </q-avatar>
             </q-item-label>
             <q-item-label lines="1">

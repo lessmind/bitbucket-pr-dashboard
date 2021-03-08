@@ -46,6 +46,7 @@ export interface BitbucketPullRequest {
   participants: {
     user: BitbucketUser;
     approved: boolean;
+    state: string;
   }[];
   destination: {
     branch: {
