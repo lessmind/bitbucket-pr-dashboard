@@ -3,7 +3,11 @@ import Vuex from 'vuex';
 
 import bitbucket from './bitbucket';
 import app from './app';
-import { BitbucketStateInterface, BITBUCKET_CRED } from './bitbucket/state';
+import {
+  BitbucketStateInterface,
+  BITBUCKET_CRED,
+  BITBUCKET_SELECTED_REPOSITORIES
+} from './bitbucket/state';
 import { AppStateInterface } from './app/state';
 
 /*
@@ -33,6 +37,16 @@ export default store(function({ Vue }) {
   const storedCred = localStorage.getItem(BITBUCKET_CRED);
   if (storedCred) {
     Store.commit('bitbucket/login', JSON.parse(storedCred));
+  }
+
+  const storedRepositories = localStorage.getItem(
+    BITBUCKET_SELECTED_REPOSITORIES
+  );
+  if (storedRepositories) {
+    Store.commit(
+      'bitbucket/selectedRepositories',
+      JSON.parse(storedRepositories)
+    );
   }
 
   return Store;

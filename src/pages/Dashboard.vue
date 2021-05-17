@@ -369,6 +369,7 @@ export default class PageDashboard extends Vue {
       'bitbucket/loadRepositories',
       this.currentWorkspace
     );
+    this.selectedRepos = this.initialSelectedRepos;
   }
 
   @Watch('intervalSecs')
@@ -432,6 +433,14 @@ export default class PageDashboard extends Vue {
       return [];
     }
     return this.$store.state.bitbucket.repositories.values.map(r => r.slug);
+  }
+
+  get initialSelectedRepos() {
+    return (
+      this.$store.state.bitbucket.selectedRepositories[
+        this.$route.params.workspace
+      ] || []
+    );
   }
 
   get pullRequests() {

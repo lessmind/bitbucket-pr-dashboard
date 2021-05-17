@@ -1,5 +1,9 @@
 import { MutationTree } from 'vuex';
-import { BitbucketStateInterface, BITBUCKET_CRED } from './state';
+import {
+  BitbucketStateInterface,
+  BITBUCKET_CRED,
+  BITBUCKET_SELECTED_REPOSITORIES
+} from './state';
 import {
   BitbucketCredential,
   BitbucketList,
@@ -33,6 +37,27 @@ const mutation: MutationTree<BitbucketStateInterface> = {
     payload: BitbucketList<BitbucketRepository> | null
   ) {
     state.repositories = Object.freeze(payload);
+  },
+  selectedRepositories(
+    state: BitbucketStateInterface,
+    payload: {
+      [key: string]: string[];
+    }
+  ) {
+    state.selectedRepositories = payload;
+  },
+  selectWorkspaceRepositories(
+    state: BitbucketStateInterface,
+    payload: {
+      repositories: string[];
+      workspace: string;
+    }
+  ) {
+    state.selectedRepositories[payload.workspace] = payload.repositories;
+    localStorage.setItem(
+      BITBUCKET_SELECTED_REPOSITORIES,
+      JSON.stringify(state.selectedRepositories)
+    );
   },
   pullRequests(
     state: BitbucketStateInterface,

@@ -171,6 +171,10 @@ const actions: ActionTree<BitbucketStateInterface, StateInterface> = {
     const addRepositories = newRepositories.filter(
       r => !oldRepositories.includes(r)
     );
+    context.commit('selectWorkspaceRepositories', {
+      workspace: workspace.slug,
+      repositories: newRepositories
+    });
     for (const slug of addRepositories) {
       await context.dispatch('loadPullRequests', {
         workspace,

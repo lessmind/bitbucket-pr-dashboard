@@ -1,4 +1,6 @@
 export const BITBUCKET_CRED = 'bitbucket.credential';
+export const BITBUCKET_SELECTED_REPOSITORIES =
+  'bitbucket.selected_repositories';
 
 import {
   BitbucketCredential,
@@ -18,6 +20,9 @@ export interface BitbucketStateInterface {
       [key: string]: BitbucketPullRequest;
     };
   };
+  selectedRepositories: {
+    [key: string]: string[];
+  };
 }
 
 const state: BitbucketStateInterface = {
@@ -28,7 +33,8 @@ const state: BitbucketStateInterface = {
   isLogin: false,
   workspaces: null,
   repositories: null,
-  pullRequests: {}
+  pullRequests: {},
+  selectedRepositories: {}
 };
 
 export default state;
